@@ -2,6 +2,11 @@ module github.com/connordoman/app-settings
 
 go 1.27.1
 
+ignore (
+	./app-settings-react
+	./app-settings-js
+)
+
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0

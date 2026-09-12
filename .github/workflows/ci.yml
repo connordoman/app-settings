@@ -1,0 +1,47 @@
+name: ci
+
+# Everything `just check-all` covers: the server, the SDK, the registry, and
+# that their versions agree. Runs on pull requests into main, and is called by
+# the release workflow so a tag is held to exactly the same gate.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - uses: extractions/setup-just@v3
+
+      - uses: sqlc-dev/setup-sqlc@v4
+        with:
+          sqlc-version: 1.31.1
+
+      # The registry installs the SDK from ../app-settings-js, copying dist/,
+      # so the SDK is built before the registry's dependencies are installed.
+      - name: Install
+        run: |
+          (cd app-settings-js && bun install --frozen-lockfile && bun run build)
+          (cd app-settings-react && bun install --frozen-lockfile)
+
+      - run: just check-all

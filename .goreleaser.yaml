@@ -1,0 +1,89 @@
+# Release pipeline for the Go binaries. Run `just release-snapshot` to exercise
+# it locally; CI runs `goreleaser release` on every v* tag.
+version: 2
+
+project_name: app-settings
+
+before:
+  hooks:
+    - go mod download
+    # Ship the completion scripts the CLI generates for itself.
+    - sh -c 'mkdir -p completions && for shell in bash zsh fish; do go run ./cmd/settingsctl completion $shell > completions/settingsctl.$shell; done'
+
+builds:
+  - id: app-settings
+    main: ./cmd/app-settings
+    binary: app-settings
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X github.com/connordoman/app-settings/internal/buildinfo.version=v{{ .Version }}
+
+  - id: settingsctl
+    main: ./cmd/settingsctl
+    binary: settingsctl
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X github.com/connordoman/app-settings/internal/buildinfo.version=v{{ .Version }}
+
+archives:
+  - id: app-settings
+    ids: [app-settings]
+    name_template: "app-settings_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - LICENSE*
+
+  - id: settingsctl
+    ids: [settingsctl]
+    name_template: "settingsctl_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - LICENSE*
+      - src: completions/*
+        dst: completions
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 99
+  filters:
+    exclude:
+      - '^docs(\(.*\))?:'
+      - '^test(\(.*\))?:'
+      - '^chore(\(.*\))?:'
+      - '^ci(\(.*\))?:'
+      - Merge pull request
+
+release:
+  # A tag like v0.2.0-rc.1 publishes as a prerelease on its own.
+  prerelease: auto

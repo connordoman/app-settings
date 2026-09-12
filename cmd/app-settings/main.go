@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
@@ -19,6 +18,7 @@ import (
 	appsettings "github.com/connordoman/app-settings"
 	"github.com/connordoman/app-settings/internal/api"
 	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/buildinfo"
 	"github.com/connordoman/app-settings/internal/cache"
 	"github.com/connordoman/app-settings/internal/config"
 	"github.com/connordoman/app-settings/internal/database"
@@ -58,7 +58,7 @@ func newRootCommand() *cobra.Command {
 		Short: "Print the server version",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "app-settings %s\n", version())
+			fmt.Fprintf(cmd.OutOrStdout(), "app-settings %s\n", buildinfo.Version())
 			return nil
 		},
 	})
@@ -147,16 +147,6 @@ func serve(ctx context.Context) error {
 
 	logger.Info("stopped")
 	return nil
-}
-
-// version reports the module version stamped in by the Go toolchain, which is
-// set for `go install`ed builds and empty for a plain `go build`.
-func version() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok || info.Main.Version == "" {
-		return "(devel)"
-	}
-	return info.Main.Version
 }
 
 func newLogger(debug bool) *slog.Logger {

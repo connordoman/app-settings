@@ -314,10 +314,11 @@ check-all` runs the server's checks and the SDK's together.
 
 ### Releasing
 
+The SDK shares one version with the Go server and the React registry, and
+publishes from CI when a `v*` tag is pushed. See [Releasing](../README.md#releasing).
+
 ```sh
-just version 0.2.0   # bump, then write the CHANGELOG entry
 just preflight       # tests, build, and the packaging checks below
-just publish         # bun publish; prepublishOnly re-runs the gate
 ```
 
 `just verify` runs [`@arethetypeswrong/cli`](https://arethetypeswrong.github.io)
