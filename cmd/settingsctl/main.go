@@ -21,7 +21,13 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
+
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	godotenv.Load()
+}
 
 // app carries the flags every command shares, plus the client built from them.
 type app struct {
