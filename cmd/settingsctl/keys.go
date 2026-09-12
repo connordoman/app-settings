@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"runtime/debug"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -245,14 +244,4 @@ func printJSON(out io.Writer, value any) error {
 	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(value)
-}
-
-// version reports the module version stamped in by the Go toolchain, which is
-// set for `go install`ed builds and empty for a plain `go build`.
-func version() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok || info.Main.Version == "" {
-		return "(devel)"
-	}
-	return info.Main.Version
 }

@@ -1,0 +1,109 @@
+name: release
+
+# One tag releases everything at one version: the Go binaries and module, the
+# TypeScript SDK on npm, and the React registry, which consumers install from
+# the tag itself (connordoman/app-settings/<item>#vX.Y.Z).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: tag is on main and matches every version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Tag is on main
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
+            || { echo "::error::$GITHUB_REF_NAME is not on main"; exit 1; }
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - uses: extractions/setup-just@v3
+
+      - name: Versions match the tag
+        run: just version-check "$GITHUB_REF_NAME"
+
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  goreleaser:
+    needs: [tag, ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # GoReleaser builds the changelog from history, so shallow won't do.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Announce the module version to the Go proxy
+        run: go list -m "github.com/connordoman/app-settings@$GITHUB_REF_NAME"
+        env:
+          GOPROXY: https://proxy.golang.org
+          GOFLAGS: -mod=mod
+
+  npm:
+    needs: goreleaser
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # provenance, and trusted publishing once it is configured
+    defaults:
+      run:
+        working-directory: app-settings-js
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - run: bun install --frozen-lockfile
+
+      - name: Publish
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if npm view "app-settings-js@$version" version >/dev/null 2>&1; then
+            echo "app-settings-js@$version is already published"
+            exit 0
+          fi
+          # A prerelease must not become what `npm install app-settings-js` resolves to.
+          dist_tag=latest
+          [[ "$version" != *-* ]] || dist_tag=next
+          npm publish --provenance --access public --tag "$dist_tag"
+        env:
+          # Only needed until trusted publishing is set up for the package on npmjs.com.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -22,6 +22,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/connordoman/app-settings/internal/buildinfo"
+
 	"github.com/joho/godotenv"
 )
 
@@ -95,7 +97,7 @@ func newVersionCommand() *cobra.Command {
 		Short: "Print the client version",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "settingsctl (App Settings) %s\n", version())
+			fmt.Fprintf(cmd.OutOrStdout(), "settingsctl (App Settings) %s\n", buildinfo.Version())
 			return nil
 		},
 	}

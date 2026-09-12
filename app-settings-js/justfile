@@ -59,12 +59,9 @@ publish:
 publish-dry:
     bun publish --dry-run
 
-# Set the package version, e.g. just version 0.2.0 (or patch/minor/major).
-version bump:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    npm version {{bump}} --no-git-tag-version
-    echo "now $(bun --print "require('./package.json').version") — update CHANGELOG.md, then run 'just preflight'"
+# Versions move in lockstep with the server and registry; this bumps all of them.
+version bump="":
+    @cd .. && just bump {{bump}}
 
 # Smoke-test a live deployment (needs SETTINGS_URL, SETTINGS_API_KEY, SETTINGS_ENVIRONMENT).
 resolve user:
