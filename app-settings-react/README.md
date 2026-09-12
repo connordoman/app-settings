@@ -1,18 +1,24 @@
 # app-settings-react
 
-React components and hooks for building [App Settings](../README.md) UIs —
+React components and hooks for building [App Settings](../README.md) UIs, specifically
 admin switchboards, preference pages, group policy editors.
 
-This is a **shadcn registry**, not an npm package. The components are copied
-into your source tree, where you own them: change the markup, restyle them,
-delete the parts you do not use. They are built on your own shadcn primitives
-and install alongside them rather than over them.
+## Requirements
+
+- [shadcn/ui](https://ui.shadcn.com)
+- React 19
+
+> [!NOTE]
+> This is a **shadcn registry**, not an npm package. The components are copied
+> into your source tree, where you own them: change the markup, restyle them,
+> delete the parts you do not use. They are built on your own shadcn primitives
+> and install alongside them rather than over them.
 
 ```bash
 npx shadcn@latest add connordoman/app-settings/app-settings
 ```
 
-Everything lands under an `app-settings` directory of its own:
+Everything lives under its own `app-settings` directory:
 
 ```tsv
 components/ui/app-settings/   setting-field, setting-input, setting-list, …
@@ -20,17 +26,12 @@ hooks/app-settings/           use-settings, use-setting, use-settings-draft
 lib/app-settings/             transport, values, keys, context, grouping
 ```
 
-Nothing of yours is touched. A missing primitive — `switch`, `select`, `badge` —
-is installed from shadcn/ui; one you already have is left exactly as it is.
+Nothing of yours is touched. A missing primitive like `switch`, `select`, or `badge`
+is installed from shadcn/ui if needed, and one you already have is used first.
 
 ## Install
 
-The registry lives in a public GitHub repository, so the CLI reads it directly.
-No hosting, no registry server, nothing to configure — and it works from inside
-the monorepo, because the manifest at the repository root includes this
-package's own:
-
-```bash
+```sh
 # everything: core, inputs, field, list and form
 npx shadcn@latest add connordoman/app-settings/app-settings
 
@@ -41,7 +42,7 @@ npx shadcn@latest add connordoman/app-settings/app-settings-core
 
 Pin a version with a ref, the same way you would pin a dependency:
 
-```bash
+```sh
 npx shadcn@latest add connordoman/app-settings/app-settings#v0.1.0
 ```
 
@@ -49,7 +50,7 @@ Find and inspect items without knowing their names — the repository address
 alone is enough, and the Go server and JS SDK sharing the repo make no
 difference:
 
-```bash
+```sh
 npx shadcn@latest list connordoman/app-settings                     # every item
 npx shadcn@latest search connordoman/app-settings -q field          # filter
 npx shadcn@latest view connordoman/app-settings/setting-field       # one payload
@@ -63,7 +64,7 @@ npx shadcn@latest add connordoman/app-settings/setting-field --dry-run
 If you would rather type `@app-settings/setting-field`, register the namespace
 once. It resolves against the built JSON in [`r/`](./r):
 
-```bash
+```sh
 npx shadcn@latest registry add @app-settings=https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/{name}.json
 npx shadcn@latest add @app-settings/setting-field
 ```
