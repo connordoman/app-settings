@@ -19,13 +19,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	settingsapp "github.com/connordoman/settings-app"
-	"github.com/connordoman/settings-app/internal/api"
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/cache"
-	"github.com/connordoman/settings-app/internal/config"
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/store"
+	appsettings "github.com/connordoman/app-settings"
+	"github.com/connordoman/app-settings/internal/api"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/cache"
+	"github.com/connordoman/app-settings/internal/config"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 // defaultTestDatabase matches the docker-compose stack started by `just up`.
@@ -61,7 +61,7 @@ func newHarness(t *testing.T) *harness {
 	}
 	t.Cleanup(pool.Close)
 
-	if err := database.Migrate(ctx, pool, settingsapp.Migrations(), nil); err != nil {
+	if err := database.Migrate(ctx, pool, appsettings.Migrations(), nil); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
 

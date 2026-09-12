@@ -1,4 +1,4 @@
-// Package api serves the Settings App HTTP interface.
+// Package api serves the App Settings HTTP interface.
 package api
 
 import (
@@ -10,10 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/cache"
-	"github.com/connordoman/settings-app/internal/config"
-	"github.com/connordoman/settings-app/internal/store"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/cache"
+	"github.com/connordoman/app-settings/internal/config"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 // Server wires the HTTP layer to its dependencies.

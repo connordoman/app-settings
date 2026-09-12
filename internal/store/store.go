@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/connordoman/settings-app/internal/database"
+	"github.com/connordoman/app-settings/internal/database"
 )
 
 // Store owns the connection pool and the generated queries bound to it.

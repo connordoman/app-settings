@@ -1,4 +1,4 @@
-# Settings App
+# App Settings
 
 A standalone REST API server written in Go that can utilize any PostgreSQL database along with an optional Redis instance to serve role-based well-described settings, scoped Personal, Intermediate or Server.
 
@@ -18,7 +18,7 @@ Settings can be scoped to a user-defined environment, like "development", "stagi
 
 ## Quick start
 
-Settings App is self-hosted: you run it against your own PostgreSQL.
+App Settings is self-hosted: you run it against your own PostgreSQL.
 
 ```sh
 just tools     # install sqlc and tern
@@ -34,7 +34,7 @@ API key to stdout. It is shown once and never stored in recoverable form:
   BOOTSTRAP API KEY — shown once, never recoverable
 ══════════════════════════════════════════════════════════════════════════
 
-  sa_5dm8m6kk5ed1_gJw9_B2u6g4SSzLqAsaPENNOK_UGA8OmtOYmcMrJBEM
+  as_5dm8m6kk5ed1_gJw9_B2u6g4SSzLqAsaPENNOK_UGA8OmtOYmcMrJBEM
 
   This key can only manage other API keys (keys:read, keys:write).
 ```
@@ -44,7 +44,7 @@ API requires a key. Use the CLI to mint the keys your services will really use:
 
 ```sh
 export SETTINGS_URL=http://localhost:8080
-export SETTINGS_API_KEY=sa_5dm8m6kk5ed1_...   # the bootstrap key
+export SETTINGS_API_KEY=as_5dm8m6kk5ed1_...   # the bootstrap key
 
 settingsctl keys create --name "web backend" \
     --scope resolve --scope values:write \
@@ -329,7 +329,7 @@ reference it.
 A token looks like:
 
 ```text
-sa_k3n8qv2mx7wd_7Hf2qN...
+as_k3n8qv2mx7wd_7Hf2qN...
 │  │             └ secret: 32 CSPRNG bytes, base64url, never stored
 │  └ prefix: stored in the clear and uniquely indexed
 └ fixed label, so a leaked key is recognisable in logs and secret scanners
@@ -364,7 +364,9 @@ Exactly one can ever exist, enforced by a partial unique index.
 
 ## CLI
 
-`settingsctl` manages keys against a live instance.
+`settingsctl` manages keys against a live instance. It is a
+[Cobra](https://github.com/spf13/cobra) CLI, so every command carries its own
+`--help` and the usual conventions apply.
 
 ```sh
 settingsctl keys create --name NAME --scope SCOPE [--env ENV] [--platform P]
@@ -373,9 +375,29 @@ settingsctl keys list [--include-revoked] [--json]
 settingsctl keys revoke <key-id>
 settingsctl whoami
 settingsctl health
+settingsctl version
 ```
 
-It reads `SETTINGS_URL` and `SETTINGS_API_KEY`.
+`--scope`, `--env` and `--platform` are repeatable and also accept a
+comma-separated list: `--scope keys:read,keys:write`.
+
+The server is reached at `--url` (default `http://localhost:8080`) and
+authenticated with `--api-key`; both fall back to `SETTINGS_URL` and
+`SETTINGS_API_KEY`, which is the usual way to set them.
+
+`keys create` prints the new token to **stdout on its own line** and everything
+else to stderr, so it pipes cleanly into a secret store:
+
+```sh
+settingsctl keys create --name "web backend" --scope resolve | pbcopy
+```
+
+Shell completion comes from Cobra — `settingsctl completion zsh --help` explains
+where to install it. `just completions` writes all four scripts to `bin/`.
+
+The server binary is a Cobra command too: `app-settings` serves the API and
+`app-settings version` prints its version. It takes no flags; configuration is
+entirely environmental.
 
 ## HTTP API
 

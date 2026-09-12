@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/connordoman/settings-app/internal/apikey"
+	"github.com/connordoman/app-settings/internal/apikey"
 )
 
 func TestGenerateRoundTrip(t *testing.T) {
@@ -91,10 +91,10 @@ func TestParseRejectsMalformed(t *testing.T) {
 
 	for _, presented := range []string{
 		"",
-		"sa_short_secret",
+		"as_short_secret",
 		"xx_" + valid.Prefix + "_" + valid.Secret,       // wrong label
-		"sa_" + valid.Prefix,                            // no secret
-		"sa_" + strings.ToUpper(valid.Prefix) + "_abcd", // prefix outside the alphabet
+		"as_" + valid.Prefix,                            // no secret
+		"as_" + strings.ToUpper(valid.Prefix) + "_abcd", // prefix outside the alphabet
 	} {
 		if _, err := apikey.Parse(presented); err == nil {
 			t.Errorf("Parse(%q) accepted a malformed token", presented)

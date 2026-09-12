@@ -12,9 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/store"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 // identityKey is where the authenticated key is stashed on the request.
@@ -57,7 +57,7 @@ func identityFrom(c *gin.Context) Identity {
 // decoyHash keeps authentication timing independent of whether a prefix
 // exists, so the endpoint cannot be used to enumerate valid prefixes.
 var decoyHash = func() []byte {
-	sum := sha256.Sum256([]byte("settings-app decoy"))
+	sum := sha256.Sum256([]byte("app-settings decoy"))
 	return sum[:]
 }()
 

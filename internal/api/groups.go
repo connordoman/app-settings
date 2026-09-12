@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/database"
+	"github.com/connordoman/app-settings/internal/database"
 )
 
 // createGroupRequest defines a group of users for the intermediate layer.

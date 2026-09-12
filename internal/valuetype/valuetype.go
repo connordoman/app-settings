@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/connordoman/settings-app/internal/database"
+	"github.com/connordoman/app-settings/internal/database"
 )
 
 // Kind aliases the generated enum so callers can use either interchangeably.

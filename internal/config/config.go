@@ -1,4 +1,4 @@
-// Package config loads server settings from the environment. Settings App is
+// Package config loads server settings from the environment. App Settings is
 // meant to be self-hosted, so everything is configurable without a config file
 // and every option has a working default.
 package config

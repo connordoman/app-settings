@@ -1,4 +1,4 @@
-// Command settings-app runs the Settings App API server.
+// Command app-settings runs the App Settings API server.
 package main
 
 import (
@@ -9,37 +9,71 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
 
-	settingsapp "github.com/connordoman/settings-app"
-	"github.com/connordoman/settings-app/internal/api"
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/cache"
-	"github.com/connordoman/settings-app/internal/config"
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/store"
+	"github.com/spf13/cobra"
+
+	appsettings "github.com/connordoman/app-settings"
+	"github.com/connordoman/app-settings/internal/api"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/cache"
+	"github.com/connordoman/app-settings/internal/config"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "settings-app: %v\n", err)
+	// Shut down cleanly on the signals a supervisor or container runtime sends.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	if err := newRootCommand().ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }
 
-func run() error {
+// newRootCommand builds the CLI. Running it with no subcommand serves the API,
+// which is what a container image or systemd unit invokes.
+func newRootCommand() *cobra.Command {
+	root := &cobra.Command{
+		Use:   "app-settings",
+		Short: "Run the App Settings API server",
+		Long: "app-settings serves the App Settings REST API.\n\n" +
+			"Everything is configured from the environment — see SETTINGS_DATABASE_URL,\n" +
+			"SETTINGS_LISTEN_ADDR and SETTINGS_REDIS_URL — so the server needs no flags\n" +
+			"and no config file.",
+		Args:          cobra.NoArgs,
+		SilenceUsage:  true, // a boot failure is not a usage mistake
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return serve(cmd.Context())
+		},
+	}
+
+	root.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Print the server version",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			fmt.Fprintf(cmd.OutOrStdout(), "app-settings %s\n", version())
+			return nil
+		},
+	})
+
+	return root
+}
+
+// serve boots the server and blocks until ctx is cancelled.
+func serve(ctx context.Context) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
 	}
 
 	logger := newLogger(cfg.Debug)
-
-	// Shut down cleanly on the signals a supervisor or container runtime sends.
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
 
 	pool, err := database.Connect(ctx, cfg.DatabaseURL)
 	if err != nil {
@@ -49,7 +83,7 @@ func run() error {
 	logger.Info("connected to postgres")
 
 	if cfg.AutoMigrate {
-		err := database.Migrate(ctx, pool, settingsapp.Migrations(), func(version int32, name string) {
+		err := database.Migrate(ctx, pool, appsettings.Migrations(), func(version int32, name string) {
 			logger.Info("applying migration", "version", version, "name", name)
 		})
 		if err != nil {
@@ -113,6 +147,16 @@ func run() error {
 
 	logger.Info("stopped")
 	return nil
+}
+
+// version reports the module version stamped in by the Go toolchain, which is
+// set for `go install`ed builds and empty for a plain `go build`.
+func version() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info.Main.Version == "" {
+		return "(devel)"
+	}
+	return info.Main.Version
 }
 
 func newLogger(debug bool) *slog.Logger {

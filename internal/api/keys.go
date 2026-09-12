@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/database"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/database"
 )
 
 // createKeyRequest is the body of POST /api/v1/keys.

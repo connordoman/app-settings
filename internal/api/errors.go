@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/connordoman/settings-app/internal/store"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 // errorBody is the single error shape every endpoint returns, so a client can

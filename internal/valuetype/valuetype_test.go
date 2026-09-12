@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/connordoman/settings-app/internal/valuetype"
+	"github.com/connordoman/app-settings/internal/valuetype"
 )
 
 // configJSON builds a Config from its wire form, failing the test if the

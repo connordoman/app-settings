@@ -1,6 +1,6 @@
-// Package settingsapp exposes the repository's embedded assets so the server
+// Package appsettings exposes the repository's embedded assets so the server
 // binary can ship its own migrations and apply them at boot.
-package settingsapp
+package appsettings
 
 import (
 	"embed"

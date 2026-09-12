@@ -2,7 +2,7 @@
 //
 // A token looks like:
 //
-//	sa_k3n8qv2mx7wd_7Hf2...43 base64url characters
+//	as_k3n8qv2mx7wd_7Hf2...43 base64url characters
 //	│  │             └ secret: 32 CSPRNG bytes, never stored
 //	│  └ prefix: stored in the clear, uniquely indexed, identifies the row
 //	└ fixed label, so a leaked token is recognisable in logs and scanners
@@ -25,8 +25,8 @@ import (
 )
 
 const (
-	// Label marks a string as a Settings App key.
-	Label = "sa"
+	// Label marks a string as an App Settings key.
+	Label = "as"
 	// PrefixLength is the number of characters in the public prefix.
 	PrefixLength = 12
 	// secretBytes is the entropy behind the secret half.

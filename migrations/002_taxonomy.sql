@@ -42,7 +42,7 @@ insert into roles (name, description, rank, is_system) values
   ('admin', 'Full access to every scope.',                        30, false);
 
 insert into platforms (name, description, is_system) values
-  ('server', 'The Settings App server itself. Always present.', true),
+  ('server', 'The App Settings server itself. Always present.', true),
   ('web',    'Browser clients.',                                false),
   ('mobile', 'Native mobile clients.',                           false);
 

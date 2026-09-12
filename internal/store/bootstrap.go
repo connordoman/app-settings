@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/connordoman/settings-app/internal/apikey"
-	"github.com/connordoman/settings-app/internal/database"
+	"github.com/connordoman/app-settings/internal/apikey"
+	"github.com/connordoman/app-settings/internal/database"
 )
 
 // BootstrapKeyName identifies the key minted at first boot.

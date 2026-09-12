@@ -1,148 +1,159 @@
 // Command settingsctl mints and manages API keys against a running Settings
 // App instance.
 //
-// Settings App is self-hosted, so the first key cannot come from the API
+// App Settings is self-hosted, so the first key cannot come from the API
 // itself. The server prints a bootstrap key on its first boot; that key can
 // only manage other keys, and this tool is how you use it:
 //
 //	export SETTINGS_URL=https://settings.internal
-//	export SETTINGS_API_KEY=sa_...            # the bootstrap key
+//	export SETTINGS_API_KEY=as_...            # the bootstrap key
 //	settingsctl keys create --name "web backend" --scope resolve --env production
 package main
 
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"text/tabwriter"
+
+	"github.com/spf13/cobra"
 )
 
-// commands are dispatched on the first argument.
-var commands = map[string]func(context.Context, *client, []string) error{
-	"keys":    runKeys,
-	"whoami":  runWhoami,
-	"health":  runHealth,
-	"version": runVersion,
+// app carries the flags every command shares, plus the client built from them.
+type app struct {
+	baseURL string
+	apiKey  string
+	client  *client
 }
 
 func main() {
+	// Ctrl-C cancels the in-flight request rather than killing the process
+	// mid-write, so a `keys create` either happens or does not.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := run(ctx, os.Args[1:]); err != nil {
-		if errors.Is(err, flag.ErrHelp) {
-			os.Exit(2)
-		}
-		fmt.Fprintf(os.Stderr, "settingsctl: %v\n", err)
+	if err := newRootCommand().ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, args []string) error {
-	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" || args[0] == "help" {
-		usage()
+func newRootCommand() *cobra.Command {
+	a := &app{}
+
+	root := &cobra.Command{
+		Use:   "settingsctl",
+		Short: "Manage App Settings API keys",
+		Long: "settingsctl manages the API keys of a running App Settings instance.\n\n" +
+			"On a new server, authenticate with the bootstrap key printed at first boot\n" +
+			"and use `keys create` to mint the keys your services will actually use.",
+		SilenceUsage:  true, // a failed request is not a usage mistake
+		SilenceErrors: false,
+	}
+
+	flags := root.PersistentFlags()
+	flags.StringVar(&a.baseURL, "url", envOr("SETTINGS_URL", "http://localhost:8080"),
+		"base URL of the server [$SETTINGS_URL]")
+	flags.StringVar(&a.apiKey, "api-key", os.Getenv("SETTINGS_API_KEY"),
+		"key to authenticate with [$SETTINGS_API_KEY]")
+
+	root.AddCommand(
+		newKeysCommand(a),
+		newWhoamiCommand(a),
+		newHealthCommand(a),
+		newVersionCommand(),
+	)
+	return root
+}
+
+// requireClient builds the HTTP client just before a command runs. It is a
+// per-command hook rather than a persistent one on the root so that Cobra's own
+// `help` and `completion` commands keep working without credentials.
+func requireClient(a *app) func(*cobra.Command, []string) error {
+	return func(*cobra.Command, []string) error {
+		if a.apiKey == "" {
+			return errors.New("no API key: pass --api-key or set SETTINGS_API_KEY " +
+				"(on a new server, the bootstrap key printed at first boot)")
+		}
+		a.client = newClient(a.baseURL, a.apiKey)
 		return nil
 	}
-
-	command, known := commands[args[0]]
-	if !known {
-		usage()
-		return fmt.Errorf("unknown command %q", args[0])
-	}
-
-	baseURL := envOr("SETTINGS_URL", "http://localhost:8080")
-	apiKey := os.Getenv("SETTINGS_API_KEY")
-
-	// `version` needs no server, so check credentials for everything else.
-	if args[0] != "version" && apiKey == "" {
-		return errors.New("set SETTINGS_API_KEY to the key you want to authenticate with " +
-			"(on a new server, the bootstrap key printed at first boot)")
-	}
-
-	return command(ctx, newClient(baseURL, apiKey), args[1:])
 }
 
-func usage() {
-	fmt.Fprint(os.Stderr, `settingsctl — manage Settings App API keys
-
-Usage:
-  settingsctl <command> [flags]
-
-Commands:
-  keys create     Mint a new API key
-  keys list       List keys (never shows secrets)
-  keys revoke     Permanently revoke a key by id
-  whoami          Describe the key in SETTINGS_API_KEY
-  health          Check that the server and its dependencies are up
-  version         Print the client version
-
-Environment:
-  SETTINGS_URL       Base URL of the server (default http://localhost:8080)
-  SETTINGS_API_KEY   The key to authenticate with
-
-Run 'settingsctl keys create -h' for the flags of a subcommand.
-`)
+func newVersionCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the client version",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			fmt.Fprintf(cmd.OutOrStdout(), "settingsctl (App Settings) %s\n", version())
+			return nil
+		},
+	}
 }
 
-func runVersion(context.Context, *client, []string) error {
-	fmt.Println("settingsctl (Settings App)")
-	return nil
+func newWhoamiCommand(a *app) *cobra.Command {
+	var asJSON bool
+
+	cmd := &cobra.Command{
+		Use:     "whoami",
+		Short:   "Describe the key you are authenticating with",
+		Args:    cobra.NoArgs,
+		PreRunE: requireClient(a),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			var identity struct {
+				KeyID        string   `json:"key_id"`
+				Name         string   `json:"name"`
+				Key          string   `json:"key"`
+				Scopes       []string `json:"scopes"`
+				Environments []string `json:"environments"`
+				Platforms    []string `json:"platforms"`
+				Role         string   `json:"role"`
+				IsBootstrap  bool     `json:"is_bootstrap"`
+			}
+			if err := a.client.do(cmd.Context(), "GET", "/api/v1/whoami", nil, &identity); err != nil {
+				return err
+			}
+			if asJSON {
+				return printJSON(cmd.OutOrStdout(), identity)
+			}
+
+			writer := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
+			fmt.Fprintf(writer, "id\t%s\n", identity.KeyID)
+			fmt.Fprintf(writer, "name\t%s\n", identity.Name)
+			fmt.Fprintf(writer, "key\t%s\n", identity.Key)
+			fmt.Fprintf(writer, "role\t%s\n", identity.Role)
+			fmt.Fprintf(writer, "scopes\t%s\n", strings.Join(identity.Scopes, ", "))
+			fmt.Fprintf(writer, "environments\t%s\n", orAll(identity.Environments))
+			fmt.Fprintf(writer, "platforms\t%s\n", orAll(identity.Platforms))
+			if identity.IsBootstrap {
+				fmt.Fprintf(writer, "bootstrap\tyes — this key can only manage other keys\n")
+			}
+			return writer.Flush()
+		},
+	}
+
+	cmd.Flags().BoolVar(&asJSON, "json", false, "print the raw JSON response")
+	return cmd
 }
 
-func runWhoami(ctx context.Context, c *client, args []string) error {
-	flags := flag.NewFlagSet("whoami", flag.ContinueOnError)
-	asJSON := flags.Bool("json", false, "print the raw JSON response")
-	if err := flags.Parse(args); err != nil {
-		return err
+func newHealthCommand(a *app) *cobra.Command {
+	return &cobra.Command{
+		Use:     "health",
+		Short:   "Check that the server and its dependencies are up",
+		Args:    cobra.NoArgs,
+		PreRunE: requireClient(a),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			var health map[string]any
+			if err := a.client.do(cmd.Context(), "GET", "/readyz", nil, &health); err != nil {
+				return err
+			}
+			return printJSON(cmd.OutOrStdout(), health)
+		},
 	}
-
-	var identity struct {
-		KeyID        string   `json:"key_id"`
-		Name         string   `json:"name"`
-		Key          string   `json:"key"`
-		Scopes       []string `json:"scopes"`
-		Environments []string `json:"environments"`
-		Platforms    []string `json:"platforms"`
-		Role         string   `json:"role"`
-		IsBootstrap  bool     `json:"is_bootstrap"`
-	}
-	if err := c.do(ctx, "GET", "/api/v1/whoami", nil, &identity); err != nil {
-		return err
-	}
-	if *asJSON {
-		return printJSON(identity)
-	}
-
-	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(writer, "id\t%s\n", identity.KeyID)
-	fmt.Fprintf(writer, "name\t%s\n", identity.Name)
-	fmt.Fprintf(writer, "key\t%s\n", identity.Key)
-	fmt.Fprintf(writer, "role\t%s\n", identity.Role)
-	fmt.Fprintf(writer, "scopes\t%s\n", strings.Join(identity.Scopes, ", "))
-	fmt.Fprintf(writer, "environments\t%s\n", orAll(identity.Environments))
-	fmt.Fprintf(writer, "platforms\t%s\n", orAll(identity.Platforms))
-	if identity.IsBootstrap {
-		fmt.Fprintf(writer, "bootstrap\tyes — this key can only manage other keys\n")
-	}
-	return writer.Flush()
-}
-
-func runHealth(ctx context.Context, c *client, args []string) error {
-	flags := flag.NewFlagSet("health", flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return err
-	}
-
-	var health map[string]any
-	if err := c.do(ctx, "GET", "/readyz", nil, &health); err != nil {
-		return err
-	}
-	return printJSON(health)
 }
 
 // orAll renders an empty filter as the "everything" it means.

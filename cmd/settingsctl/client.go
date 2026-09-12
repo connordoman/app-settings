@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// client is a thin wrapper over the Settings App HTTP API.
+// client is a thin wrapper over the App Settings HTTP API.
 type client struct {
 	baseURL string
 	apiKey  string

@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/valuetype"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/valuetype"
 )
 
 // valueRequest carries a value for any layer. Visible and Enforced apply only

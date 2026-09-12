@@ -1,4 +1,4 @@
--- API keys. A token looks like `sa_<prefix>_<secret>`:
+-- API keys. A token looks like `as_<prefix>_<secret>`:
 --
 --   prefix  12 chars, stored in the clear and uniquely indexed -> O(1) lookup
 --   secret  32 CSPRNG bytes, base64url, never stored

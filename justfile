@@ -1,4 +1,4 @@
-# Settings App — development tasks.
+# App Settings — development tasks.
 # Run `just` to see this list.
 
 # Local development defaults. Override any of them in the environment.
@@ -26,11 +26,11 @@ up:
 
 # Stop them, keeping data.
 down:
-    docker compose down
+	docker compose down
 
 # Stop them and delete the data volume.
 reset:
-    docker compose down --volumes
+	docker compose down --volumes
 
 # Regenerate the sqlc query layer from queries/ and migrations/.
 generate:
@@ -59,16 +59,24 @@ new-migration name:
 
 # Build both binaries into bin/.
 build:
-    go build -o bin/settings-app ./cmd/settings-app
+    go build -o bin/app-settings ./cmd/app-settings
     go build -o bin/settingsctl ./cmd/settingsctl
 
 # Run the server against the local stack.
 run:
-    go run ./cmd/settings-app
+    go run ./cmd/app-settings
 
 # Run the CLI: just ctl keys list
 ctl *args:
     go run ./cmd/settingsctl {{args}}
+
+# Generate shell completion scripts into bin/.
+completions: build
+    @mkdir -p bin/completions
+    @for shell in bash zsh fish powershell; do \
+        ./bin/settingsctl completion $shell > bin/completions/settingsctl.$shell ; \
+    done
+    @echo "wrote bin/completions/settingsctl.{bash,zsh,fish,powershell}"
 
 test:
     go test ./...

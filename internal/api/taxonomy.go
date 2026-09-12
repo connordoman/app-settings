@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/store"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/store"
 )
 
 // taxonomyRequest is the body for creating or updating a role, platform or

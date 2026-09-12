@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/connordoman/settings-app/internal/database"
-	"github.com/connordoman/settings-app/internal/valuetype"
+	"github.com/connordoman/app-settings/internal/database"
+	"github.com/connordoman/app-settings/internal/valuetype"
 )
 
 // Source names the layer an effective value came from.

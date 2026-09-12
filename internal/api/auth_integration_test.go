@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/connordoman/settings-app/internal/apikey"
+	"github.com/connordoman/app-settings/internal/apikey"
 )
 
 // TestBootstrapKeyIsCLIOnly checks the key minted at first boot can mint other
