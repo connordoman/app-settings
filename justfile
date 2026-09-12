@@ -94,8 +94,25 @@ lint:
 fmt:
     gofmt -w .
 
-# Everything CI runs.
+# Everything CI runs for the server.
 check: lint test generate-check
 
 # Bring up a clean stack, migrate and start the server.
 dev: up migrate run
+
+# --- TypeScript SDK (app-settings-js) -----------------------------------------
+
+# Run a recipe from the SDK's own justfile: just sdk test
+sdk *args:
+    @cd app-settings-js && just {{args}}
+
+# Type-check and test the SDK.
+sdk-check:
+    @cd app-settings-js && just check
+
+# Build the SDK's bundles and declarations.
+sdk-build:
+    @cd app-settings-js && just build
+
+# Everything CI runs, server and SDK both.
+check-all: check sdk-check
