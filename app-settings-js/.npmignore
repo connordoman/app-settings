@@ -1,0 +1,35 @@
+# What ships is decided by the "files" allowlist in package.json; this file is
+# the safety net underneath it. Without an .npmignore, npm falls back to
+# .gitignore — which excludes dist/ — so removing "files" would otherwise
+# publish a package with no build output in it.
+
+# Build tooling and configuration.
+scripts/
+tsconfig.json
+tsconfig.build.json
+justfile
+*.tsbuildinfo
+
+# Tests, which are not part of the published surface.
+test/
+**/*.test.ts
+**/*.spec.ts
+coverage/
+*.lcov
+
+# Local development.
+node_modules/
+bun.lock
+bun.lockb
+.env
+.env.*
+CLAUDE.md
+.markdownlint-cli2.jsonc
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Anything a build might leave behind outside dist/.
+out/
+*.tgz

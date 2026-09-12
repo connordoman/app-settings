@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "app-settings",
+  "type": "registry:block",
+  "title": "App Settings UI",
+  "description": "Everything: the core hooks, every input, the field, the list and the form. Start here for an admin switchboard.",
+  "author": "Connor Doman <connor@connordoman.dev>",
+  "categories": [
+    "settings",
+    "dashboard"
+  ],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/settings-form.json",
+    "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/setting-list.json"
+  ]
+}

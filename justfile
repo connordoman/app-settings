@@ -94,8 +94,39 @@ lint:
 fmt:
     gofmt -w .
 
-# Everything CI runs.
+# Everything CI runs for the server.
 check: lint test generate-check
 
 # Bring up a clean stack, migrate and start the server.
 dev: up migrate run
+
+# --- TypeScript SDK (app-settings-js) -----------------------------------------
+
+# Run a recipe from the SDK's own justfile: just sdk test
+sdk *args:
+    @cd app-settings-js && just {{args}}
+
+# Type-check and test the SDK.
+sdk-check:
+    @cd app-settings-js && just check
+
+# Build the SDK's bundles and declarations.
+sdk-build:
+    @cd app-settings-js && just build
+
+# --- React registry (app-settings-react) --------------------------------------
+
+# Run a recipe from the registry's own justfile: just ui build
+ui *args:
+    @cd app-settings-react && just {{args}}
+
+# Type-check, verify the manifest and test the registry.
+ui-check:
+    @cd app-settings-react && just check
+
+# Rebuild the hosted registry JSON in app-settings-react/r/.
+ui-build:
+    @cd app-settings-react && just build
+
+# Everything CI runs: server, SDK and registry.
+check-all: check sdk-check ui-check

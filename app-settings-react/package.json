@@ -1,0 +1,37 @@
+{
+  "name": "app-settings-react",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A shadcn registry of React components and hooks for building App Settings admin UIs. Installed into your source tree, not imported from node_modules.",
+  "keywords": ["app-settings", "shadcn", "shadcn-registry", "react", "settings", "feature-flags"],
+  "homepage": "https://github.com/connordoman/app-settings/tree/main/app-settings-react#readme",
+  "bugs": { "url": "https://github.com/connordoman/app-settings/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/connordoman/app-settings.git",
+    "directory": "app-settings-react"
+  },
+  "license": "MIT",
+  "author": "Connor Doman <connor@connordoman.dev>",
+  "type": "module",
+  "scripts": {
+    "build": "bun run scripts/build-registry.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check": "bun run typecheck && bun test && bun run build --check"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.66.0",
+    "@types/bun": "latest",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "app-settings-js": "file:../app-settings-js",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.1",
+    "typescript": "^7.0.2"
+  }
+}
