@@ -1,0 +1,6 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "app-settings",
+  "homepage": "https://github.com/connordoman/app-settings",
+  "include": ["app-settings-react/registry.json"]
+}
