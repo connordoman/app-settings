@@ -1,0 +1,68 @@
+# App Settings React registry — development tasks.
+# Run `just` to see this list.
+
+# Where a namespaced install resolves items from.
+export REGISTRY_BASE_URL := env_var_or_default("REGISTRY_BASE_URL", "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r")
+
+_default:
+    @just --list --unsorted
+
+# Install dependencies.
+install:
+    bun install
+
+# Run the test suite.
+test *args:
+    bun test {{args}}
+
+# Re-run tests as files change.
+watch:
+    bun test --watch
+
+# Type-check the registry source against the primitive stubs.
+typecheck:
+    bunx tsc --noEmit -p tsconfig.json
+
+# Check the manifest without writing anything: targets, imports, dependencies.
+verify:
+    bun run scripts/build-registry.ts --check
+    bun run scripts/build-registry.ts --check --registry ../registry.json
+
+# Validate the manifest with the shadcn CLI itself, root and include chain (needs network).
+validate:
+    cd .. && bunx shadcn@latest registry validate ./registry.json
+
+# Validate the registry as a consumer's CLI sees it on GitHub. Needs the ref pushed.
+validate-remote ref="main":
+    bunx shadcn@latest registry validate connordoman/app-settings#{{ref}}
+
+# List the items a consumer would discover, reading GitHub rather than the working tree.
+list-remote ref="main":
+    bunx shadcn@latest list connordoman/app-settings#{{ref}}
+
+# Build the hosted registry into r/. Commit the result: raw.githubusercontent serves it.
+build:
+    bun run scripts/build-registry.ts --base-url "$REGISTRY_BASE_URL"
+
+# Remove build output.
+clean:
+    rm -rf r
+
+# Everything CI runs for this package.
+check: typecheck verify test
+
+# List the items a consumer would see.
+items:
+    @bun --print 'require("./registry.json").items.map((i) => `${i.name.padEnd(20)} ${i.title}`).join("\n")'
+
+# Print the install commands, for the README or a release note.
+install-commands:
+    @bun --print 'require("./registry.json").items.map((i) => `npx shadcn@latest add connordoman/app-settings/${i.name}`).join("\n")'
+
+# Install this registry into another project, to try it for real: just try ../my-app app-settings
+try project item="app-settings":
+    cd {{project}} && npx shadcn@latest add connordoman/app-settings/{{item}}
+
+# Install from the working tree instead of GitHub, for a change not yet pushed.
+try-local project item="app-settings": build
+    cd {{project}} && npx shadcn@latest add {{justfile_directory()}}/r/{{item}}.json

@@ -1,0 +1,212 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "app-settings",
+  "homepage": "https://github.com/connordoman/app-settings/tree/main/app-settings-react",
+  "items": [
+    {
+      "name": "app-settings-core",
+      "type": "registry:lib",
+      "title": "App Settings core",
+      "description": "The transport, hooks and provider every App Settings component reads. Install this alone to build your own UI over App Settings resolutions with React Query.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "feature-flags"],
+      "dependencies": ["app-settings-js@^0.1.0", "@tanstack/react-query@^5.66.0"],
+      "files": [
+        {
+          "path": "registry/app-settings/lib/app-settings/types.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/types.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/values.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/values.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/grouping.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/grouping.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/keys.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/keys.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/context.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/context.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/transport.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/transport.ts"
+        },
+        {
+          "path": "registry/app-settings/hooks/app-settings/use-settings.ts",
+          "type": "registry:hook",
+          "target": "@hooks/app-settings/use-settings.ts"
+        },
+        {
+          "path": "registry/app-settings/hooks/app-settings/use-setting.ts",
+          "type": "registry:hook",
+          "target": "@hooks/app-settings/use-setting.ts"
+        },
+        {
+          "path": "registry/app-settings/hooks/app-settings/use-settings-draft.ts",
+          "type": "registry:hook",
+          "target": "@hooks/app-settings/use-settings-draft.ts"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/app-settings-provider.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/app-settings-provider.tsx"
+        }
+      ],
+      "docs": "Wrap your settings page in <AppSettingsProvider transport={...}>. Use transportFromClient(new AppSettingsClient({ ... })) to talk to App Settings directly, or createHttpTransport({ resolve, write }) to go through your own API. Set SETTINGS_URL and SETTINGS_API_KEY server-side; never ship an API key to the browser."
+    },
+    {
+      "name": "setting-inputs",
+      "type": "registry:ui",
+      "title": "Setting inputs",
+      "description": "One control per setting type — BOOLEAN, NUMBER, STRING, DATETIME, SELECT and JSON — plus the dispatcher that picks between them and the context that lets you swap any of them out.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "form"],
+      "registryDependencies": [
+        "connordoman/app-settings/app-settings-core",
+        "input",
+        "textarea",
+        "switch",
+        "checkbox",
+        "select",
+        "label"
+      ],
+      "files": [
+        {
+          "path": "registry/app-settings/hooks/app-settings/use-setting-text.ts",
+          "type": "registry:hook",
+          "target": "@hooks/app-settings/use-setting-text.ts"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-input.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-switch.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-switch.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-number-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-number-input.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-text-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-text-input.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-datetime-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-datetime-input.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-select.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-select.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-json-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-json-input.tsx"
+        }
+      ]
+    },
+    {
+      "name": "setting-field",
+      "type": "registry:ui",
+      "title": "Setting field",
+      "description": "A labelled setting row: name, description, the right control for its type, the layer its value came from, and the badge that says a group policy is holding it in place.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "form"],
+      "dependencies": ["class-variance-authority@^0.7.1", "lucide-react"],
+      "registryDependencies": [
+        "connordoman/app-settings/setting-inputs",
+        "label",
+        "badge",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-field.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-source-badge.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-source-badge.tsx"
+        },
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-reset-button.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-reset-button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "setting-list",
+      "type": "registry:block",
+      "title": "Setting list",
+      "description": "A whole resolution as sections of setting rows, each writing as it changes. The switchboard.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "dashboard"],
+      "registryDependencies": [
+        "connordoman/app-settings/setting-field",
+        "card",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "registry/app-settings/ui/app-settings/setting-list.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/setting-list.tsx"
+        }
+      ]
+    },
+    {
+      "name": "settings-form",
+      "type": "registry:block",
+      "title": "Settings form",
+      "description": "Many settings edited together and saved in one go, with a sticky footer that counts what is pending and keeps the rows that failed.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "form"],
+      "registryDependencies": [
+        "connordoman/app-settings/setting-list",
+        "button",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "registry/app-settings/ui/app-settings/settings-form.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/settings-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "app-settings",
+      "type": "registry:block",
+      "title": "App Settings UI",
+      "description": "Everything: the core hooks, every input, the field, the list and the form. Start here for an admin switchboard.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "dashboard"],
+      "registryDependencies": [
+        "connordoman/app-settings/settings-form",
+        "connordoman/app-settings/setting-list"
+      ]
+    }
+  ]
+}
