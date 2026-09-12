@@ -1,55 +1,72 @@
 {
   "name": "app-settings-js",
   "version": "0.1.0",
-  "description": "TypeScript SDK for the App Settings API. No dependencies; runs in browsers, Node, Bun and Deno.",
-  "type": "module",
+  "description": "TypeScript SDK for the App Settings API: role-based, layered application settings. No dependencies; runs in browsers, Node, Bun and Deno.",
+  "keywords": [
+    "app-settings",
+    "settings",
+    "preferences",
+    "feature-flags",
+    "configuration",
+    "remote-config",
+    "sdk",
+    "typescript",
+    "isomorphic"
+  ],
+  "homepage": "https://github.com/connordoman/app-settings/tree/main/app-settings-js#readme",
+  "bugs": {
+    "url": "https://github.com/connordoman/app-settings/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/connordoman/app-settings.git",
+    "directory": "app-settings-js"
+  },
   "license": "MIT",
-  "sideEffects": false,
+  "author": "Connor Doman <connor@connordoman.dev>",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.js",
+  "jsdelivr": "./dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18"
   },
-  "keywords": [
-    "settings",
-    "feature-flags",
-    "configuration",
-    "sdk"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "bun run build:js && bun run build:types",
-    "build:js": "bun build src/index.ts --outdir=dist --format=esm --target=node --sourcemap=linked && bun build src/index.ts --outdir=dist --entry-naming='[dir]/[name].cjs' --format=cjs --target=node --sourcemap=linked",
-    "build:types": "tsc -p tsconfig.build.json",
+    "build": "bun run scripts/build.ts",
     "clean": "rm -rf dist",
     "test": "bun test",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check": "bun run typecheck && bun test",
-    "prepublishOnly": "bun run clean && bun run build && bun run check"
+    "pack": "bun run build && bun pm pack --dry-run",
+    "prepublishOnly": "bun run check && bun run build"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^7"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
+    "@types/bun": "latest",
+    "typescript": "^7.0.2"
   }
 }

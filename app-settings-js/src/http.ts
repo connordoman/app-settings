@@ -1,4 +1,4 @@
-import { AppSettingsError } from "./errors.js";
+import { AppSettingsError } from "./errors.ts";
 
 /** The subset of `fetch` this SDK uses, so any compatible implementation fits. */
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;

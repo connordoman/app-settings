@@ -1,4 +1,4 @@
-import type { ErrorCode } from "./types.js";
+import type { ErrorCode } from "./types.ts";
 
 /**
  * Codes this SDK raises on top of the ones the server defines. They occupy the

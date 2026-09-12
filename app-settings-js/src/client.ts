@@ -1,6 +1,6 @@
-import { AppSettingsError } from "./errors.js";
-import { createTransport, request, type FetchLike, type RequestOptions, type TransportConfig, type TransportOptions } from "./http.js";
-import { SettingsSnapshot } from "./snapshot.js";
+import { AppSettingsError } from "./errors.ts";
+import { createTransport, request, type FetchLike, type RequestOptions, type TransportConfig, type TransportOptions } from "./http.ts";
+import { SettingsSnapshot } from "./snapshot.ts";
 import type {
   ApiKey,
   CreatedApiKey,
@@ -21,7 +21,7 @@ import type {
   SettingValue,
   TypeConfig,
   WhoAmI,
-} from "./types.js";
+} from "./types.ts";
 
 /** How to reach the server, and what to assume when a call does not say. */
 export interface ClientOptions extends TransportOptions {

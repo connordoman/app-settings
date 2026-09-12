@@ -1,6 +1,6 @@
-import { parseInstant } from "./datetime.js";
-import { AppSettingsError } from "./errors.js";
-import type { Override, ResolveResponse, ResolvedSetting, SelectOption, SettingValue } from "./types.js";
+import { parseInstant } from "./datetime.ts";
+import { AppSettingsError } from "./errors.ts";
+import type { Override, ResolveResponse, ResolvedSetting, SelectOption, SettingValue } from "./types.ts";
 
 /**
  * A resolution, wrapped so reading a value is a one-liner.

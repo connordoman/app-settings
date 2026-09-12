@@ -1,4 +1,4 @@
-import { AppSettingsError } from "./errors.js";
+import { AppSettingsError } from "./errors.ts";
 
 /**
  * Helpers for the `DATETIME` type, which accepts only a strict RFC 3339

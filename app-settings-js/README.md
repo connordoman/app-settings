@@ -294,6 +294,12 @@ const client = new AppSettingsClient({
 });
 ```
 
+## Requirements
+
+Any runtime with a global `fetch`: **Node 18+**, Bun, Deno, or a browser. Pass
+your own `fetch` for anything older. TypeScript is optional; when used, the
+declarations are checked against **TypeScript 5.9 and 7.x**.
+
 ## Development
 
 ```sh
@@ -305,3 +311,25 @@ just test       # bun test
 
 From the repository root, `just sdk <recipe>` reaches these, and `just
 check-all` runs the server's checks and the SDK's together.
+
+### Releasing
+
+```sh
+just version 0.2.0   # bump, then write the CHANGELOG entry
+just preflight       # tests, build, and the packaging checks below
+just publish         # bun publish; prepublishOnly re-runs the gate
+```
+
+`just verify` runs [`@arethetypeswrong/cli`](https://arethetypeswrong.github.io)
+and [`publint`](https://publint.dev) against the real tarball, which is what
+catches the two failure modes this package is shaped around:
+
+- **The `require` path needs its own declarations.** `package.json` is
+  `type: module`, so a lone `index.d.ts` describes the CommonJS build as ESM.
+  The build emits a `.d.cts` beside every `.d.ts` and the `exports` map points
+  each condition at the matching one.
+- **`sideEffects` is deliberately absent.** Bun 1.4.0's bundler tree-shakes
+  every module out of a pure re-export barrel when that field is present,
+  emitting `export { … }` with nothing bound — valid-looking output, a zero
+  exit code, and a package that throws `SyntaxError` on import. `bun run build`
+  asserts the bundle contains an implementation so this cannot ship again.

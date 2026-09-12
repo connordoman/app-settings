@@ -1,8 +1,8 @@
-import type { AppSettingsClient, ResolveUserOptions } from "./client.js";
-import { toInstant } from "./datetime.js";
-import { AppSettingsError } from "./errors.js";
-import { SettingsSnapshot } from "./snapshot.js";
-import type { ResolveResponse, SettingValue } from "./types.js";
+import type { AppSettingsClient, ResolveUserOptions } from "./client.ts";
+import { toInstant } from "./datetime.ts";
+import { AppSettingsError } from "./errors.ts";
+import { SettingsSnapshot } from "./snapshot.ts";
+import type { ResolveResponse, SettingValue } from "./types.ts";
 
 /**
  * A reactive store over one resolution.

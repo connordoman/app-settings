@@ -31,12 +31,42 @@ clean:
 # Everything CI runs for this package.
 check: typecheck test
 
-# Confirm the published package contains what it should.
+# List exactly what would be published.
 pack: build
     bun pm pack --dry-run
 
-# Resolve a user against a live server, to smoke-test a real deployment.
-# Needs SETTINGS_URL, SETTINGS_API_KEY and SETTINGS_ENVIRONMENT.
+# Write the tarball to the current directory, for inspection or a manual install.
+tarball: build
+    bun pm pack
+
+# Check exports, types and metadata the way a consumer's tooling will (needs network).
+verify: tarball
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tgz="app-settings-js-$(bun --print "require('./package.json').version").tgz"
+    trap 'rm -f "$tgz"' EXIT
+    bunx --bun @arethetypeswrong/cli@latest "$tgz"
+    bunx --bun publint@latest "$tgz"
+
+# Everything that must pass before a release: tests, build and packaging checks.
+preflight: check verify
+
+# Publish to npm; the prepublishOnly hook re-runs the full gate first.
+publish:
+    bun publish
+
+# Preview a publish without doing it.
+publish-dry:
+    bun publish --dry-run
+
+# Set the package version, e.g. just version 0.2.0 (or patch/minor/major).
+version bump:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    npm version {{bump}} --no-git-tag-version
+    echo "now $(bun --print "require('./package.json').version") — update CHANGELOG.md, then run 'just preflight'"
+
+# Smoke-test a live deployment (needs SETTINGS_URL, SETTINGS_API_KEY, SETTINGS_ENVIRONMENT).
 resolve user:
     @bun --eval ' \
       const { AppSettingsClient } = await import("./src/index.ts"); \

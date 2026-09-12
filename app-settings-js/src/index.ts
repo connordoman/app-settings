@@ -5,7 +5,7 @@
  * Bun, Deno and edge runtimes.
  */
 
-export { AppSettingsClient } from "./client.js";
+export { AppSettingsClient } from "./client.ts";
 export type {
   ClientOptions,
   CreateGroupInput,
@@ -18,12 +18,12 @@ export type {
   ResolveOptions,
   ResolveUserOptions,
   UpdateSettingInput,
-} from "./client.js";
+} from "./client.ts";
 
-export { SettingsSnapshot, snapshotFrom } from "./snapshot.js";
+export { SettingsSnapshot, snapshotFrom } from "./snapshot.ts";
 
-export { createSettingsStore } from "./store.js";
-export type { SettingsState, SettingsStore, SettingsStoreOptions } from "./store.js";
+export { createSettingsStore } from "./store.ts";
+export type { SettingsState, SettingsStore, SettingsStoreOptions } from "./store.ts";
 
 export {
   AppSettingsError,
@@ -32,10 +32,10 @@ export {
   isInvalidRequest,
   isNotFound,
   isUnauthorized,
-} from "./errors.js";
-export type { AnyErrorCode, ClientErrorCode } from "./errors.js";
+} from "./errors.ts";
+export type { AnyErrorCode, ClientErrorCode } from "./errors.ts";
 
-export { isInstant, localToInstant, parseInstant, toDateTimeLocal, toInstant } from "./datetime.js";
+export { isInstant, localToInstant, parseInstant, toDateTimeLocal, toInstant } from "./datetime.ts";
 
 export type {
   ApiKey,
@@ -62,4 +62,4 @@ export type {
   TypeConfig,
   ValueSource,
   WhoAmI,
-} from "./types.js";
+} from "./types.ts";
