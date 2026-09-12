@@ -471,3 +471,33 @@ just check      # lint + test + generated-code freshness
   user-defined name, triggers keep `updated_at` honest, and a trigger refuses
   any value written to a layer the setting's scope forbids — so the invariant
   holds even for something writing to the database directly.
+
+## Releasing
+
+The server, the TypeScript SDK and the React registry share one version, so
+`v0.4.0` of any of them works with `v0.4.0` of the others. A release that
+changes only one package still moves them all; the others simply ship nothing
+new.
+
+```sh
+just version-next   # what the commits since the last tag call for
+just bump           # write that version everywhere (or: just bump 0.4.0)
+# review app-settings-js/CHANGELOG.md, open a PR, merge it
+just release        # on an up-to-date main: tag v0.4.0 and push
+```
+
+The bump follows conventional commits across the whole repository: any `fix`
+is a patch, any `feat` a minor, and any `!` or `BREAKING CHANGE` a major. Below
+1.0, pass the version to `just bump` to keep a breaking change on `0.x`. From
+v2 the Go module path needs a `/vN` suffix, and `just bump` refuses to cross
+that line until go.mod has it.
+
+Pushing the tag runs `.github/workflows/release.yml`, which refuses to publish
+unless the tag is on main, every package's version matches it, and
+`just check-all` passes. It then publishes the Go binaries to a GitHub release,
+announces the module to the Go proxy, and publishes the SDK to npm (prereleases
+under the `next` dist-tag). The registry needs no publishing: consumers install
+it from the tag, `connordoman/app-settings/<item>#v0.4.0`.
+
+`just version-check` runs in `just check-all`, so a hand-edited version that
+drifts fails before it can be merged.

@@ -12,6 +12,10 @@ export PGSSLMODE := env_var_or_default("PGSSLMODE", "disable")
 export SETTINGS_DATABASE_URL := env_var_or_default("SETTINGS_DATABASE_URL", "postgres://settings:settings@localhost:5433/settings?sslmode=disable")
 export SETTINGS_REDIS_URL := env_var_or_default("SETTINGS_REDIS_URL", "redis://localhost:6380/0")
 
+# Computes the next version from conventional commits. Pinned and run through
+# `go run`, so every machine calculates the same bump without installing it.
+svu := "go run github.com/caarlos0/svu/v3@v3.4.1"
+
 _default:
     @just --list --unsorted
 
@@ -128,10 +132,35 @@ ui-check:
 ui-build:
     @cd app-settings-react && just build
 
-# Everything CI runs: server, SDK and registry.
-check-all: check sdk-check ui-check
+# Everything CI runs: server, SDK, registry, and that their versions agree.
+check-all: check sdk-check ui-check version-check
 
 # --- Releases -----------------------------------------------------------------
+# The server, SDK and registry share one version. `just bump` writes it into
+# every file that carries it; merge that, then `just release` tags main.
+
+# Print the version the repository is at.
+version:
+    @bun scripts/version.ts current
+
+# Fail if any package disagrees with the others, or with a tag: just version-check v0.2.0
+version-check tag="":
+    @bun scripts/version.ts check {{tag}}
+
+# Preview the version the commits since the last tag call for.
+version-next:
+    @{{svu}} next
+
+# Move every package to one version: just bump (from commits) or just bump 0.2.0
+# svu reads a breaking change as a major even below 1.0; pass a version to stay on 0.x.
+bump version="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    next="{{version}}"
+    [[ -n "$next" ]] || next="$({{svu}} next)"
+    bun scripts/version.ts set "$next"
+    just ui-build
+    echo "review app-settings-js/CHANGELOG.md, then commit: chore(release): v${next#v}"
 
 # Validate .goreleaser.yaml.
 release-check:
@@ -141,10 +170,21 @@ release-check:
 release-snapshot:
     goreleaser release --snapshot --clean
 
-# Tag the current commit and push it; the release workflow does the rest.
-# Pass the full tag: just release v0.1.0
-release tag:
-    @git diff --quiet HEAD || (echo "working tree is dirty; commit first" && exit 1)
-    @git rev-parse -q --verify refs/tags/{{tag}} >/dev/null && (echo "{{tag}} already exists" && exit 1) || true
-    git tag -a {{tag}} -m "{{tag}}"
-    git push origin {{tag}}
+# Tag main at the version its files declare and push; the release workflow publishes.
+release:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tag="v$(bun scripts/version.ts current)"
+    [[ "$(git branch --show-current)" == main ]] || { echo "release from main"; exit 1; }
+    git diff --quiet HEAD || { echo "working tree is dirty; commit first"; exit 1; }
+    git fetch --quiet --tags origin main
+    [[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] \
+      || { echo "main is not at origin/main; pull or push first"; exit 1; }
+    ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+      || { echo "$tag already exists; run 'just bump' and merge it first"; exit 1; }
+    bun scripts/version.ts check "$tag"
+    git tag -a "$tag" -m "$tag"
+    git push origin "$tag"
+
+build-snapshot:
+    goreleaser build --snapshot --clean --single-target
