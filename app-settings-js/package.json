@@ -1,0 +1,55 @@
+{
+  "name": "app-settings-js",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the App Settings API. No dependencies; runs in browsers, Node, Bun and Deno.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "settings",
+    "feature-flags",
+    "configuration",
+    "sdk"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build src/index.ts --outdir=dist --format=esm --target=node --sourcemap=linked && bun build src/index.ts --outdir=dist --entry-naming='[dir]/[name].cjs' --format=cjs --target=node --sourcemap=linked",
+    "build:types": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check": "bun run typecheck && bun test",
+    "prepublishOnly": "bun run clean && bun run build && bun run check"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  }
+}

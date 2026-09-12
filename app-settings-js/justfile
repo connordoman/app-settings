@@ -1,0 +1,49 @@
+# App Settings TypeScript SDK — development tasks.
+# Run `just` to see this list.
+
+_default:
+    @just --list --unsorted
+
+# Install dependencies.
+install:
+    bun install
+
+# Run the test suite.
+test *args:
+    bun test {{args}}
+
+# Re-run tests as files change.
+watch:
+    bun test --watch
+
+# Type-check without emitting anything.
+typecheck:
+    bunx tsc --noEmit -p tsconfig.json
+
+# Build the ESM and CJS bundles plus declarations into dist/.
+build: clean
+    bun run build
+
+# Remove build output.
+clean:
+    rm -rf dist
+
+# Everything CI runs for this package.
+check: typecheck test
+
+# Confirm the published package contains what it should.
+pack: build
+    bun pm pack --dry-run
+
+# Resolve a user against a live server, to smoke-test a real deployment.
+# Needs SETTINGS_URL, SETTINGS_API_KEY and SETTINGS_ENVIRONMENT.
+resolve user:
+    @bun --eval ' \
+      const { AppSettingsClient } = await import("./src/index.ts"); \
+      const client = new AppSettingsClient({ \
+        baseUrl: process.env.SETTINGS_URL ?? "http://localhost:8080", \
+        apiKey: process.env.SETTINGS_API_KEY ?? "", \
+        environment: process.env.SETTINGS_ENVIRONMENT ?? "development", \
+      }); \
+      console.log(JSON.stringify(await client.resolveUser("{{user}}").then((s) => s.toObject()), null, 2)); \
+    '

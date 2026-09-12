@@ -1,0 +1,16 @@
+{
+  // Declaration output only. The JavaScript itself is bundled by `bun build`,
+  // which is why noEmit is lifted here but emitDeclarationOnly is set.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["ESNext", "DOM"],
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}
