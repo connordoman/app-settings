@@ -14,7 +14,7 @@ npx shadcn@latest add connordoman/app-settings/app-settings
 
 Everything lands under an `app-settings` directory of its own:
 
-```
+```tsv
 components/ui/app-settings/   setting-field, setting-input, setting-list, …
 hooks/app-settings/           use-settings, use-setting, use-settings-draft
 lib/app-settings/             transport, values, keys, context, grouping
@@ -82,14 +82,14 @@ Or add it to `components.json` by hand:
 
 ### Items
 
-| Item | What it is |
-| --- | --- |
-| `app-settings` | Everything below. Start here. |
-| `app-settings-core` | Transport, hooks, provider. No UI — install this alone to build your own. |
-| `setting-inputs` | One control per type: `BOOLEAN`, `NUMBER`, `STRING`, `DATETIME`, `SELECT`, `JSON`. |
-| `setting-field` | A labelled row: name, description, control, source badge, override badge, reset. |
-| `setting-list` | A whole resolution as sections of rows, each writing as it changes. |
-| `settings-form` | The same rows held as a draft and saved together. |
+| Item                | What it is                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `app-settings`      | Everything below. Start here.                                                      |
+| `app-settings-core` | Transport, hooks, provider. No UI — install this alone to build your own.          |
+| `setting-inputs`    | One control per type: `BOOLEAN`, `NUMBER`, `STRING`, `DATETIME`, `SELECT`, `JSON`. |
+| `setting-field`     | A labelled row: name, description, control, source badge, override badge, reset.   |
+| `setting-list`      | A whole resolution as sections of rows, each writing as it changes.                |
+| `settings-form`     | The same rows held as a draft and saved together.                                  |
 
 Requires React 19, Tailwind v4, a shadcn project (`components.json`),
 [`@tanstack/react-query`](https://tanstack.com/query) v5 and
@@ -155,8 +155,8 @@ import { SettingsForm } from "@/components/ui/app-settings/settings-form";
 import { createHttpTransport } from "@/lib/app-settings/transport";
 
 const transport = createHttpTransport({
-  resolve: "/api/settings",        // GET, with user_id / environment / platform appended
-  write: "/api/settings/write",    // POST { setting_id, name, layer, value, clear, … }
+  resolve: "/api/settings", // GET, with user_id / environment / platform appended
+  write: "/api/settings/write", // POST { setting_id, name, layer, value, clear, … }
   credentials: "include",
 });
 
@@ -194,13 +194,13 @@ import { AppSettingsClient } from "app-settings-js";
 
 const client = new AppSettingsClient({
   baseUrl: process.env.SETTINGS_URL!,
-  apiKey: process.env.SETTINGS_API_KEY!,   // stays here
+  apiKey: process.env.SETTINGS_API_KEY!, // stays here
   environment: process.env.SETTINGS_ENVIRONMENT!,
 });
 
 export async function GET(request: Request) {
   const userId = new URL(request.url).searchParams.get("user_id");
-  const session = await requireSession();           // your auth, not ours
+  const session = await requireSession(); // your auth, not ours
   if (userId && userId !== session.userId) return new Response(null, { status: 403 });
 
   const snapshot = await client.resolveUser(session.userId);
@@ -228,12 +228,12 @@ Every part is a prop or a slot:
 ```tsx
 <SettingField
   name="billing.tax_rate"
-  label="Tax rate"                  // overrides the derived label
+  label="Tax rate" // overrides the derived label
   description="Applied at checkout." // overrides the definition's
-  layout="stacked"                  // "auto" | "inline" | "stacked"
+  layout="stacked" // "auto" | "inline" | "stacked"
   size="sm"
-  showName={false}                  // hide the raw setting key
-  showSource={false}                // hide the layer badge
+  showName={false} // hide the raw setting key
+  showSource={false} // hide the layer badge
   className="rounded-lg border px-4"
   inputProps={{ commitOn: "change", placeholder: "0.00" }}
 />
@@ -264,7 +264,9 @@ data-setting="signups.enabled"  data-enforced   data-overridden   data-dirty   d
 
 ```css
 /* every enforced row, greyed and marked */
-[data-slot="setting-field"][data-enforced] { opacity: .7 }
+[data-slot="setting-field"][data-enforced] {
+  opacity: 0.7;
+}
 ```
 
 ### `<SettingList>` and `<SettingsForm>`
@@ -302,11 +304,10 @@ const enabled = useSettingValue<boolean>("beta.enabled", false);
 
 ```ts
 // one setting, written on change, optimistic and rolled back on failure
-const { value, set, clear, canWrite, isWriting, problem, status } =
-  useSetting("rate.limit");
+const { value, set, clear, canWrite, isWriting, problem, status } = useSetting("rate.limit");
 
-await set(120);   // resolves false if local validation or the request rejected it
-await clear();    // fall back to the layer beneath
+await set(120); // resolves false if local validation or the request rejected it
+await clear(); // fall back to the layer beneath
 ```
 
 ```ts
@@ -314,9 +315,9 @@ await clear();    // fall back to the layer beneath
 const draft = useSettingsDraft({ names: ["rate.limit", "signups.enabled"] });
 
 draft.setValue("rate.limit", 120);
-draft.dirty;        // ["rate.limit"]
-draft.problems;     // { "rate.limit": { rule: "max", message: "Must be 100 or less." } }
-const result = await draft.save();   // { written: [...], failed: [...] }
+draft.dirty; // ["rate.limit"]
+draft.problems; // { "rate.limit": { rule: "max", message: "Must be 100 or less." } }
+const result = await draft.save(); // { written: [...], failed: [...] }
 ```
 
 `useSettingsDraft` writes one setting at a time and keeps the edits that failed,
@@ -394,13 +395,13 @@ contain `/` if the repository ever needs a second registry — everything after
 
 The CLI maps a registry import onto the consumer's own aliases:
 
-| Authored as | Installed as | Lands at |
-| --- | --- | --- |
-| `@/registry/app-settings/ui/app-settings/setting-field` | `<ui alias>/app-settings/setting-field` | `@ui/app-settings/setting-field.tsx` |
+| Authored as                                              | Installed as                             | Lands at                             |
+| -------------------------------------------------------- | ---------------------------------------- | ------------------------------------ |
+| `@/registry/app-settings/ui/app-settings/setting-field`  | `<ui alias>/app-settings/setting-field`  | `@ui/app-settings/setting-field.tsx` |
 | `@/registry/app-settings/hooks/app-settings/use-setting` | `<hooks alias>/app-settings/use-setting` | `@hooks/app-settings/use-setting.ts` |
-| `@/registry/app-settings/lib/app-settings/values` | `<lib alias>/app-settings/values` | `@lib/app-settings/values.ts` |
-| `@/components/ui/switch` | `<ui alias>/switch` | the consumer's own primitive |
-| `@/lib/utils` | `<utils alias>` | the consumer's own `cn` |
+| `@/registry/app-settings/lib/app-settings/values`        | `<lib alias>/app-settings/values`        | `@lib/app-settings/values.ts`        |
+| `@/components/ui/switch`                                 | `<ui alias>/switch`                      | the consumer's own primitive         |
+| `@/lib/utils`                                            | `<utils alias>`                          | the consumer's own `cn`              |
 
 So a project whose `components.json` points `ui` at `@/components/shared` gets
 the components at `@/components/shared/app-settings/…`, with every internal
