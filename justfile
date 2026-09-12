@@ -1,0 +1,93 @@
+# Settings App — development tasks.
+# Run `just` to see this list.
+
+# Local development defaults. Override any of them in the environment.
+export PGHOST := env_var_or_default("PGHOST", "localhost")
+export PGPORT := env_var_or_default("PGPORT", "5433")
+export PGDATABASE := env_var_or_default("PGDATABASE", "settings")
+export PGUSER := env_var_or_default("PGUSER", "settings")
+export PGPASSWORD := env_var_or_default("PGPASSWORD", "settings")
+export PGSSLMODE := env_var_or_default("PGSSLMODE", "disable")
+
+export SETTINGS_DATABASE_URL := env_var_or_default("SETTINGS_DATABASE_URL", "postgres://settings:settings@localhost:5433/settings?sslmode=disable")
+export SETTINGS_REDIS_URL := env_var_or_default("SETTINGS_REDIS_URL", "redis://localhost:6380/0")
+
+_default:
+    @just --list --unsorted
+
+# Install the code-generation and migration tools this project uses.
+tools:
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+    go install github.com/jackc/tern/v2@latest
+
+# Start Postgres and Redis.
+up:
+    docker compose up -d --wait
+
+# Stop them, keeping data.
+down:
+    docker compose down
+
+# Stop them and delete the data volume.
+reset:
+    docker compose down --volumes
+
+# Regenerate the sqlc query layer from queries/ and migrations/.
+generate:
+    sqlc generate
+
+# Verify the generated code is current — for CI, where a stale commit should fail.
+generate-check: generate
+    @git diff --exit-code --stat internal/database \
+      || (echo "internal/database is stale: run 'just generate' and commit the result" && exit 1)
+
+# Apply all outstanding migrations.
+migrate:
+    tern migrate --migrations ./migrations --config ./tern.conf
+
+# Roll back the most recent migration.
+migrate-down:
+    tern migrate --migrations ./migrations --config ./tern.conf --destination -1
+
+# Show the current schema version.
+migrate-status:
+    tern status --migrations ./migrations --config ./tern.conf
+
+# Scaffold a migration: just new-migration add_widget_table
+new-migration name:
+    tern new --migrations ./migrations {{name}}
+
+# Build both binaries into bin/.
+build:
+    go build -o bin/settings-app ./cmd/settings-app
+    go build -o bin/settingsctl ./cmd/settingsctl
+
+# Run the server against the local stack.
+run:
+    go run ./cmd/settings-app
+
+# Run the CLI: just ctl keys list
+ctl *args:
+    go run ./cmd/settingsctl {{args}}
+
+test:
+    go test ./...
+
+# Tests that need the local Postgres from `just up`.
+test-integration:
+    go test -tags=integration -count=1 ./...
+
+# Formatting and vet.
+lint:
+    @test -z "$(gofmt -l .)" || (gofmt -l . ; echo "unformatted files above; run 'just fmt'" ; exit 1)
+    go vet ./...
+    go vet -tags=integration ./...
+
+fmt:
+    gofmt -w .
+
+# Everything CI runs.
+check: lint test generate-check
+
+# Bring up a clean stack, migrate and start the server.
+dev: up migrate run
