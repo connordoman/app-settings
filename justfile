@@ -130,3 +130,21 @@ ui-build:
 
 # Everything CI runs: server, SDK and registry.
 check-all: check sdk-check ui-check
+
+# --- Releases -----------------------------------------------------------------
+
+# Validate .goreleaser.yaml.
+release-check:
+    goreleaser check
+
+# Build the full release into dist/ without tagging or publishing anything.
+release-snapshot:
+    goreleaser release --snapshot --clean
+
+# Tag the current commit and push it; the release workflow does the rest.
+# Pass the full tag: just release v0.1.0
+release tag:
+    @git diff --quiet HEAD || (echo "working tree is dirty; commit first" && exit 1)
+    @git rev-parse -q --verify refs/tags/{{tag}} >/dev/null && (echo "{{tag}} already exists" && exit 1) || true
+    git tag -a {{tag}} -m "{{tag}}"
+    git push origin {{tag}}
