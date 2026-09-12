@@ -1,0 +1,79 @@
+# App Settings TypeScript SDK — development tasks.
+# Run `just` to see this list.
+
+_default:
+    @just --list --unsorted
+
+# Install dependencies.
+install:
+    bun install
+
+# Run the test suite.
+test *args:
+    bun test {{args}}
+
+# Re-run tests as files change.
+watch:
+    bun test --watch
+
+# Type-check without emitting anything.
+typecheck:
+    bunx tsc --noEmit -p tsconfig.json
+
+# Build the ESM and CJS bundles plus declarations into dist/.
+build: clean
+    bun run build
+
+# Remove build output.
+clean:
+    rm -rf dist
+
+# Everything CI runs for this package.
+check: typecheck test
+
+# List exactly what would be published.
+pack: build
+    bun pm pack --dry-run
+
+# Write the tarball to the current directory, for inspection or a manual install.
+tarball: build
+    bun pm pack
+
+# Check exports, types and metadata the way a consumer's tooling will (needs network).
+verify: tarball
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tgz="app-settings-js-$(bun --print "require('./package.json').version").tgz"
+    trap 'rm -f "$tgz"' EXIT
+    bunx --bun @arethetypeswrong/cli@latest "$tgz"
+    bunx --bun publint@latest "$tgz"
+
+# Everything that must pass before a release: tests, build and packaging checks.
+preflight: check verify
+
+# Publish to npm; the prepublishOnly hook re-runs the full gate first.
+publish:
+    bun publish
+
+# Preview a publish without doing it.
+publish-dry:
+    bun publish --dry-run
+
+# Set the package version, e.g. just version 0.2.0 (or patch/minor/major).
+version bump:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    npm version {{bump}} --no-git-tag-version
+    echo "now $(bun --print "require('./package.json').version") — update CHANGELOG.md, then run 'just preflight'"
+
+# Smoke-test a live deployment (needs SETTINGS_URL, SETTINGS_API_KEY, SETTINGS_ENVIRONMENT).
+resolve user:
+    @bun --eval ' \
+      const { AppSettingsClient } = await import("./src/index.ts"); \
+      const client = new AppSettingsClient({ \
+        baseUrl: process.env.SETTINGS_URL ?? "http://localhost:8080", \
+        apiKey: process.env.SETTINGS_API_KEY ?? "", \
+        environment: process.env.SETTINGS_ENVIRONMENT ?? "development", \
+      }); \
+      console.log(JSON.stringify(await client.resolveUser("{{user}}").then((s) => s.toObject()), null, 2)); \
+    '
