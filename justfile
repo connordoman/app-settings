@@ -114,5 +114,19 @@ sdk-check:
 sdk-build:
     @cd app-settings-js && just build
 
-# Everything CI runs, server and SDK both.
-check-all: check sdk-check
+# --- React registry (app-settings-react) --------------------------------------
+
+# Run a recipe from the registry's own justfile: just ui build
+ui *args:
+    @cd app-settings-react && just {{args}}
+
+# Type-check, verify the manifest and test the registry.
+ui-check:
+    @cd app-settings-react && just check
+
+# Rebuild the hosted registry JSON in app-settings-react/r/.
+ui-build:
+    @cd app-settings-react && just build
+
+# Everything CI runs: server, SDK and registry.
+check-all: check sdk-check ui-check
