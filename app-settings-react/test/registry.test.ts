@@ -23,7 +23,7 @@ describe("registry", () => {
     const result = Bun.spawnSync(["bun", script, "--check", "--registry", "../registry.json"]);
 
     expect(result.exitCode).toBe(0);
-    expect(new TextDecoder().decode(result.stdout)).toContain("6 items");
+    expect(new TextDecoder().decode(result.stdout)).toContain("7 items");
   });
 
   test("every item declares a title and a description for the CLI to show", async () => {

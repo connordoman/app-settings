@@ -17,6 +17,7 @@ import type {
   ResolveQuery,
   ResolveResponse,
   SettingsTransport,
+  WhoAmI,
   WriteRequest,
 } from "@/registry/app-settings/lib/app-settings/types";
 
@@ -65,6 +66,8 @@ export function transportFromClient(client: AppSettingsClient): SettingsTranspor
             signal,
           }));
     },
+
+    whoami: (signal) => client.whoami({ signal }),
   };
 }
 
@@ -98,6 +101,11 @@ export interface HttpTransportOptions {
    * Pass a function to write to a REST route of your own shape.
    */
   write?: HttpRoute<WriteRequest>;
+  /**
+   * Where the calling key is described, as App Settings' `whoami` body. Omit
+   * it and anything gated on the key's scopes defers to your API instead.
+   */
+  whoami?: HttpRoute<void>;
   /** Sent on every request. A function is called per request, for a fresh token. */
   headers?: Record<string, string> | (() => Record<string, string> | Promise<Record<string, string>>);
   /** Forwarded to `fetch`, for a session-cookie API. */
@@ -152,6 +160,15 @@ export function createHttpTransport(options: HttpTransportOptions): SettingsTran
         body: writeBody(request),
       }));
       await send(spec, signal);
+    };
+  }
+
+  if (options.whoami) {
+    const route = options.whoami;
+    transport.whoami = async (signal) => {
+      const spec = resolveSpec(route, undefined, () => ({ url: routeUrl(route, undefined) }));
+      const response = await send(spec, signal);
+      return (await response.json()) as WhoAmI;
     };
   }
 

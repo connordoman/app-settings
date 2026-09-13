@@ -14,12 +14,14 @@ import type {
   SettingType,
   SettingValue,
   ValueSource,
+  WhoAmI,
 } from "app-settings-js";
 
 export type {
   Override,
   ResolvedSetting,
   ResolveResponse,
+  Scope,
   SelectOption,
   Setting,
   SettingScope,
@@ -27,6 +29,7 @@ export type {
   SettingValue,
   TypeConfig,
   ValueSource,
+  WhoAmI,
 } from "app-settings-js";
 
 /** Which layer a write lands in. */
@@ -76,6 +79,11 @@ export interface SettingsTransport {
    * their controls rather than offering an edit that cannot land.
    */
   write?(request: WriteRequest, signal?: AbortSignal): Promise<void>;
+  /**
+   * Describes the calling API key. Omit it when the page cannot know: anything
+   * gated on the key's scopes then defers to the server instead of disabling.
+   */
+  whoami?(signal?: AbortSignal): Promise<WhoAmI>;
 }
 
 /** A control that renders one setting's value, for the type-to-input registry. */

@@ -93,10 +93,30 @@
       ]
     },
     {
+      "name": "new-setting-empty",
+      "type": "registry:block",
+      "title": "New setting empty state",
+      "description": "An empty state offering to create a personal, group or server setting, each variant visibly disabled when the API key lacks the scopes to create it.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": [
+        "settings",
+        "empty"
+      ],
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "connordoman/app-settings/app-settings-core",
+        "empty",
+        "button"
+      ]
+    },
+    {
       "name": "app-settings",
       "type": "registry:block",
       "title": "App Settings UI",
-      "description": "Everything: the core hooks, every input, the field, the list and the form. Start here for an admin switchboard.",
+      "description": "Everything: the core hooks, every input, the field, the list, the form and the new-setting empty state. Start here for an admin switchboard.",
       "author": "Connor Doman <connor@connordoman.dev>",
       "categories": [
         "settings",
@@ -104,7 +124,8 @@
       ],
       "registryDependencies": [
         "connordoman/app-settings/settings-form",
-        "connordoman/app-settings/setting-list"
+        "connordoman/app-settings/setting-list",
+        "connordoman/app-settings/new-setting-empty"
       ]
     }
   ]
