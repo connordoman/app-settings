@@ -3,7 +3,7 @@
   "name": "app-settings",
   "type": "registry:block",
   "title": "App Settings UI",
-  "description": "Everything: the core hooks, every input, the field, the list and the form. Start here for an admin switchboard.",
+  "description": "Everything: the core hooks, every input, the field, the list, the form and the new-setting empty state. Start here for an admin switchboard.",
   "author": "Connor Doman <connor@connordoman.dev>",
   "categories": [
     "settings",
@@ -11,6 +11,7 @@
   ],
   "registryDependencies": [
     "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/settings-form.json",
-    "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/setting-list.json"
+    "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/setting-list.json",
+    "https://raw.githubusercontent.com/connordoman/app-settings/main/app-settings-react/r/new-setting-empty.json"
   ]
 }

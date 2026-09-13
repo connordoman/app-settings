@@ -91,6 +91,7 @@ Or add it to `components.json` by hand:
 | `setting-field`     | A labelled row: name, description, control, source badge, override badge, reset.   |
 | `setting-list`      | A whole resolution as sections of rows, each writing as it changes.                |
 | `settings-form`     | The same rows held as a draft and saved together.                                  |
+| `new-setting-empty` | Create a personal, group or server setting; disabled where the key cannot.         |
 
 Requires React 19, Tailwind v4, a shadcn project (`components.json`),
 [`@tanstack/react-query`](https://tanstack.com/query) v5 and
@@ -282,6 +283,35 @@ data-setting="signups.enabled"  data-enforced   data-overridden   data-dirty   d
 
 Both take `names`, `filter`, `titles`, `card` and `fieldProps`, and both accept
 `renderField` / `footer` when the defaults are not what you want.
+
+### `<NewSettingEmpty>` and `<NewSettingChooser>`
+
+An empty state, built on shadcn's `Empty`, offering to create a setting in one
+layer. Each variant — `personal`, `group`, `server` — asks the transport's
+`whoami` what the API key may do, and renders visibly disabled (dimmed, locked,
+with the missing scopes named) when it cannot.
+
+```tsx
+<NewSettingEmpty variant="group" onCreate={() => setDialog("group")} />
+
+// all three side by side
+<NewSettingChooser onCreate={(layer) => setDialog(layer)} />
+```
+
+The server asks for `settings:write` to create a setting of any scope, so that
+is the default for every variant. Tighten one with `requirements`, or check
+scopes you already hold instead of calling `whoami`:
+
+```tsx
+<NewSettingChooser
+  requirements={{ server: ["settings:write", "values:write"] }}
+  scopes={session.scopes}
+/>
+```
+
+`transportFromClient` provides `whoami`; give `createHttpTransport` a `whoami`
+route to get the same. Without one, every variant stays enabled and the server
+decides. `readOnly` on the provider disables them all.
 
 ### Overriding a control everywhere
 
