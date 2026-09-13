@@ -91,9 +91,14 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
+      # `npm stage` needs npm >= 11.15.0; Node 24's bundled npm may be older.
+      - run: npm install -g npm@latest
+
       - run: bun install --frozen-lockfile
 
-      - name: Publish
+      # Stages the version rather than publishing it: a maintainer approves it
+      # with 2FA (`npm stage approve <stage-id>` or on npmjs.com) before it goes live.
+      - name: Stage for approval
         run: |
           version="${GITHUB_REF_NAME#v}"
           if npm view "app-settings-js@$version" version >/dev/null 2>&1; then
@@ -103,7 +108,8 @@ jobs:
           # A prerelease must not become what `npm install app-settings-js` resolves to.
           dist_tag=latest
           [[ "$version" != *-* ]] || dist_tag=next
-          npm publish --provenance --access public --tag "$dist_tag"
+          npm stage publish --provenance --access public --tag "$dist_tag"
         env:
-          # Only needed until trusted publishing is set up for the package on npmjs.com.
+          # A "Read and write (stage only)" granular token. Only needed until
+          # trusted publishing is set up for the package on npmjs.com.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

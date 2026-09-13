@@ -10,7 +10,7 @@
       "description": "The transport, hooks and provider every App Settings component reads. Install this alone to build your own UI over App Settings resolutions with React Query.",
       "author": "Connor Doman <connor@connordoman.dev>",
       "categories": ["settings", "feature-flags"],
-      "dependencies": ["app-settings-js@^0.1.1", "@tanstack/react-query@^5.66.0"],
+      "dependencies": ["app-settings-js@^0.1.2", "@tanstack/react-query@^5.66.0"],
       "files": [
         {
           "path": "registry/app-settings/lib/app-settings/types.ts",
