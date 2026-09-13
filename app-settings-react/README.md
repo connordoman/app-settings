@@ -43,7 +43,7 @@ npx shadcn@latest add connordoman/app-settings/app-settings-core
 Pin a version with a ref, the same way you would pin a dependency:
 
 ```sh
-npx shadcn@latest add connordoman/app-settings/app-settings#v0.1.0
+npx shadcn@latest add connordoman/app-settings/app-settings#v0.1.1
 ```
 
 Find and inspect items without knowing their names — the repository address
