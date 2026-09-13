@@ -1,6 +1,6 @@
 {
   "name": "app-settings-react",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "A shadcn registry of React components and hooks for building App Settings admin UIs. Installed into your source tree, not imported from node_modules.",
   "keywords": ["app-settings", "shadcn", "shadcn-registry", "react", "settings", "feature-flags"],
