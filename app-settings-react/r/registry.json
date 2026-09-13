@@ -14,7 +14,7 @@
         "feature-flags"
       ],
       "dependencies": [
-        "app-settings-js@^0.1.1",
+        "app-settings-js@^0.1.2",
         "@tanstack/react-query@^5.66.0"
       ],
       "docs": "Wrap your settings page in <AppSettingsProvider transport={...}>. Use transportFromClient(new AppSettingsClient({ ... })) to talk to App Settings directly, or createHttpTransport({ resolve, write }) to go through your own API. Set SETTINGS_URL and SETTINGS_API_KEY server-side; never ship an API key to the browser."
