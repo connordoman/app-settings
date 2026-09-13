@@ -45,6 +45,18 @@ describe("createHttpTransport", () => {
     );
   });
 
+  test("a whoami route is a GET, and without one the transport cannot describe the key", async () => {
+    const { fetchLike, calls } = recordingFetch({ body: { key_id: "k1", scopes: ["settings:write"] } });
+
+    const transport = createHttpTransport({ resolve: "/api/settings", whoami: "/api/me", fetch: fetchLike });
+    const key = await transport.whoami?.();
+
+    expect(key?.scopes).toEqual(["settings:write"]);
+    expect(calls[0]?.url).toBe("/api/me");
+    expect(calls[0]?.init.method).toBe("GET");
+    expect(createHttpTransport({ resolve: "/api/settings" }).whoami).toBeUndefined();
+  });
+
   test("query parameters already on the URL are kept", async () => {
     const { fetchLike, calls } = recordingFetch({ body: resolution([]) });
 

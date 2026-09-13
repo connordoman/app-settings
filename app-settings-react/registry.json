@@ -10,7 +10,7 @@
       "description": "The transport, hooks and provider every App Settings component reads. Install this alone to build your own UI over App Settings resolutions with React Query.",
       "author": "Connor Doman <connor@connordoman.dev>",
       "categories": ["settings", "feature-flags"],
-      "dependencies": ["app-settings-js@^0.1.2", "@tanstack/react-query@^5.66.0"],
+      "dependencies": ["app-settings-js@^0.1.3", "@tanstack/react-query@^5.66.0"],
       "files": [
         {
           "path": "registry/app-settings/lib/app-settings/types.ts",
@@ -56,6 +56,16 @@
           "path": "registry/app-settings/hooks/app-settings/use-settings-draft.ts",
           "type": "registry:hook",
           "target": "@hooks/app-settings/use-settings-draft.ts"
+        },
+        {
+          "path": "registry/app-settings/lib/app-settings/permissions.ts",
+          "type": "registry:lib",
+          "target": "@lib/app-settings/permissions.ts"
+        },
+        {
+          "path": "registry/app-settings/hooks/app-settings/use-api-key.ts",
+          "type": "registry:hook",
+          "target": "@hooks/app-settings/use-api-key.ts"
         },
         {
           "path": "registry/app-settings/ui/app-settings/app-settings-provider.tsx",
@@ -197,15 +207,37 @@
       ]
     },
     {
+      "name": "new-setting-empty",
+      "type": "registry:block",
+      "title": "New setting empty state",
+      "description": "An empty state offering to create a personal, group or server setting, each variant visibly disabled when the API key lacks the scopes to create it.",
+      "author": "Connor Doman <connor@connordoman.dev>",
+      "categories": ["settings", "empty"],
+      "dependencies": ["class-variance-authority@^0.7.1", "lucide-react"],
+      "registryDependencies": [
+        "connordoman/app-settings/app-settings-core",
+        "empty",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "registry/app-settings/ui/app-settings/new-setting-empty.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-settings/new-setting-empty.tsx"
+        }
+      ]
+    },
+    {
       "name": "app-settings",
       "type": "registry:block",
       "title": "App Settings UI",
-      "description": "Everything: the core hooks, every input, the field, the list and the form. Start here for an admin switchboard.",
+      "description": "Everything: the core hooks, every input, the field, the list, the form and the new-setting empty state. Start here for an admin switchboard.",
       "author": "Connor Doman <connor@connordoman.dev>",
       "categories": ["settings", "dashboard"],
       "registryDependencies": [
         "connordoman/app-settings/settings-form",
-        "connordoman/app-settings/setting-list"
+        "connordoman/app-settings/setting-list",
+        "connordoman/app-settings/new-setting-empty"
       ]
     }
   ]

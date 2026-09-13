@@ -1,6 +1,6 @@
 {
   "name": "app-settings-js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "TypeScript SDK for the App Settings API: role-based, layered application settings. No dependencies; runs in browsers, Node, Bun and Deno.",
   "keywords": [
     "app-settings",

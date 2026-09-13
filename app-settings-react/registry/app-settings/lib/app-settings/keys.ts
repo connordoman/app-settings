@@ -24,6 +24,9 @@ export const appSettingsKeys = {
   /** Setting definitions, for an editor that lists more than a resolution does. */
   definitions: (filters: Record<string, unknown> = {}): QueryKey =>
     [...appSettingsKeys.all(), "definitions", filters] as const,
+
+  /** The calling API key, as the transport describes it. */
+  whoami: () => [...appSettingsKeys.all(), "whoami"] as const,
 };
 
 /**
